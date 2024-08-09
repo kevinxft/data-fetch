@@ -70,8 +70,8 @@ function generateAsciiTable(data: Data) {
   );
 
   // 生成表格
-  let table = "# Songs Left Change Table\n\n";
-  table += "| Date       | Songs Left | Songs Left Change |\n";
+  let table = "# API 每日使用量\n\n";
+  table += "| 日期       | 还剩的总次数 | 当天用的次数 |\n";
   table += "|------------|------------|-------------------|\n";
 
   for (let i = 0; i < sortedDates.length; i++) {
