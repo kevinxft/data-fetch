@@ -1,6 +1,5 @@
 import axios from "axios";
 import { readFileSync, writeFileSync, existsSync } from "fs";
-import Table from "cli-table3";
 
 // 从环境变量获取 API_KEY 和 MAX_DAYS
 const API_KEY = process.env.API_KEY as string;
@@ -47,71 +46,52 @@ async function fetchData() {
     // 将更新后的数据写回文件
     writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 
-    console.log(`Data for ${date} saved successfully.`);
-
-    // 生成并更新 README.md 中的表格
-    const differences = calculateDifferences(data);
-    const table = generateTable(differences);
-    updateReadme(table);
+    const readmeContent = generateAsciiTable(data);
+    writeFileSync(README_FILE, readmeContent);
   } catch (error) {
     console.error("Error fetching data:", error);
   }
 }
 
-// 计算每日 songs_left 差值
-function calculateDifferences(data: Record<string, { songs_left: number }>) {
-  const dates = Object.keys(data).sort(); // 按日期排序
-  const differences = [];
+type DataEntry = {
+  code: number;
+  msg: string;
+  data: {
+    songs_left: number;
+    points: number;
+  };
+};
 
-  for (let i = 1; i < dates.length; i++) {
-    const prevDate = dates[i - 1];
-    const currDate = dates[i];
-    const prevData = data[prevDate];
-    const currData = data[currDate];
+type Data = {
+  [date: string]: DataEntry;
+};
 
-    const songsDifference = prevData.songs_left - currData.songs_left;
+function generateAsciiTable(data: Data): string {
+  // 获取所有日期并按降序排序
+  const dates = Object.keys(data).sort((a, b) => (b > a ? 1 : -1));
 
-    differences.push({
-      date: currDate,
-      songsDifference,
-    });
-  }
+  const rows = dates.map((date, index) => {
+    const currentEntry = data[date];
+    const currentSongs = currentEntry.data.songs_left;
 
-  return differences;
-}
+    let prevSongs = currentSongs;
+    if (index < dates.length - 1) {
+      // 使用下一天的数据来计算差异
+      const nextDate = dates[index + 1];
+      prevSongs = data[nextDate].data.songs_left;
+    }
 
-// 生成 ASCII 表格
-function generateTable(
-  differences: { date: string; songsDifference: number }[]
-) {
-  const table = new Table({
-    head: ["Date", "Songs Difference"],
-    colWidths: [15, 20],
+    const diff = prevSongs - currentSongs;
+
+    return `${date.padEnd(12)} | ${currentSongs.toString().padStart(5)} |  ${
+      diff > 0 ? diff.toString().padStart(4) : ""
+    }`;
   });
 
-  differences.forEach((diff) => {
-    table.push([diff.date, diff.songsDifference.toString()]);
-  });
+  const header = "日期         | 歌曲剩余数 |   用了";
+  const separator = "-".repeat(header.length);
 
-  return table.toString();
-}
-
-// 更新 README.md 文件
-function updateReadme(table: string) {
-  const readmeContent = `## Daily Songs Left Differences\n\nHere is the table showing the difference in songs left between each day:\n\n\`\`\`plaintext\n${table}\n\`\`\``;
-
-  if (existsSync(README_FILE)) {
-    const existingContent = readFileSync(README_FILE, "utf-8");
-    const newContent = existingContent.replace(
-      /## Daily Songs Left Differences[\s\S]*?(?=\n##|\n$)/,
-      readmeContent
-    );
-    writeFileSync(README_FILE, newContent);
-  } else {
-    writeFileSync(README_FILE, readmeContent);
-  }
-
-  console.log("README file updated with the new table.");
+  return [header, separator, ...rows].join("\n");
 }
 
 // 主函数

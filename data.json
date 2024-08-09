@@ -1,9 +1,33 @@
 {
+  "2024-08-06": {
+    "code": 0,
+    "msg": "success",
+    "data": {
+      "songs_left": 3333,
+      "points": 0
+    }
+  },
+  "2024-08-07": {
+    "code": 0,
+    "msg": "success",
+    "data": {
+      "songs_left": 3111,
+      "points": 0
+    }
+  },
+  "2024-08-08": {
+    "code": 0,
+    "msg": "success",
+    "data": {
+      "songs_left": 3000,
+      "points": 0
+    }
+  },
   "2024-08-09": {
     "code": 0,
     "msg": "success",
     "data": {
-      "songs_left": 2877,
+      "songs_left": 2873,
       "points": 0
     }
   }
