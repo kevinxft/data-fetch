@@ -1,0 +1,36 @@
+name: Daily Data Fetch
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # 每天 00:00 UTC 触发一次
+
+jobs:
+  fetch-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: "latest"
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Fetch data
+        run: bun run fetch-data
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          MAX_DAYS: ${{ secrets.MAX_DAYS }}
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "kevinxft@gmailcom"
+          git config --local user.name "kevinxft"
+          git add .
+          git commit -m "Update data for $(date +'%Y-%m-%d')"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
