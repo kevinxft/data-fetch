@@ -7,7 +7,6 @@ const API_KEY = process.env.API_KEY as string;
 const MAX_DAYS = parseInt(process.env.MAX_DAYS || "30", 10); // 默认值为 30 天
 const DATA_FILE = "data.json"; // 数据存储文件
 const README_FILE = "README.md"; // 要更新的 README 文件
-
 // 获取数据并存储
 async function fetchData() {
   const config = {
@@ -33,6 +32,17 @@ async function fetchData() {
 
     // 更新数据
     data[date] = newData;
+
+    // 保持数据不超过 MAX_DAYS 天
+    const sortedDates = Object.keys(data).sort();
+    if (sortedDates.length > MAX_DAYS) {
+      const cutoffDate = sortedDates[sortedDates.length - MAX_DAYS - 1];
+      for (const dateKey of sortedDates) {
+        if (new Date(dateKey) < new Date(cutoffDate)) {
+          delete data[dateKey];
+        }
+      }
+    }
 
     // 将更新后的数据写回文件
     writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
