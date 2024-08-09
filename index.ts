@@ -81,7 +81,7 @@ function generateAsciiTable(data: Data) {
     if (i > 0) {
       const prevDate = sortedDates[i - 1];
       const prevSongsLeft = data[prevDate].data.songs_left;
-      const change = prevSongsLeft - currSongsLeft;
+      const change = currSongsLeft - prevSongsLeft; // 计算当前歌曲剩余数与前一个日期的差值
 
       table += `| ${currDate} | ${currSongsLeft} | ${change}                |\n`;
     } else {
