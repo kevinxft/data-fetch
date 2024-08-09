@@ -5,7 +5,6 @@ import { readFileSync, writeFileSync, existsSync } from "fs";
 const API_KEY = process.env.API_KEY as string;
 const MAX_DAYS = parseInt(process.env.MAX_DAYS || "30", 10); // 默认值为 30 天
 const DATA_FILE = "data.json"; // 数据存储文件
-const README_FILE = "README.md"; // 要更新的 README 文件
 // 获取数据并存储
 async function fetchData() {
   const config = {
@@ -46,8 +45,7 @@ async function fetchData() {
     // 将更新后的数据写回文件
     writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 
-    const readmeContent = generateAsciiTable(data);
-    writeFileSync(README_FILE, readmeContent);
+    generateAsciiTable(data);
   } catch (error) {
     console.error("Error fetching data:", error);
   }
@@ -66,32 +64,33 @@ type Data = {
   [date: string]: DataEntry;
 };
 
-function generateAsciiTable(data: Data): string {
-  // 获取所有日期并按降序排序
-  const dates = Object.keys(data).sort((a, b) => (b > a ? 1 : -1));
+function generateAsciiTable(data: Data) {
+  // 将数据按日期排序
+  const sortedDates = Object.keys(data).sort(
+    (a, b) => new Date(a).getTime() - new Date(b).getTime()
+  );
 
-  const rows = dates.map((date, index) => {
-    const currentEntry = data[date];
-    const currentSongs = currentEntry.data.songs_left;
+  // 生成表格
+  let table = "# Songs Left Change Table\n\n";
+  table += "| Date       | Songs Left Change |\n";
+  table += "|------------|-------------------|\n";
 
-    let prevSongs = currentSongs;
-    if (index < dates.length - 1) {
-      // 使用下一天的数据来计算差异
-      const nextDate = dates[index + 1];
-      prevSongs = data[nextDate].data.songs_left;
-    }
+  for (let i = 1; i < sortedDates.length; i++) {
+    const prevDate = sortedDates[i - 1];
+    const currDate = sortedDates[i];
 
-    const diff = prevSongs - currentSongs;
+    const prevSongsLeft = data[prevDate].data.songs_left;
+    const currSongsLeft = data[currDate].data.songs_left;
 
-    return `${date.padEnd(12)} | ${currentSongs.toString().padStart(5)} |  ${
-      diff > 0 ? diff.toString().padStart(4) : ""
-    }`;
-  });
+    const change = prevSongsLeft - currSongsLeft;
 
-  const header = "日期         | 歌曲剩余数 |   用了";
-  const separator = "-".repeat(header.length);
+    table += `| ${currDate} | ${change}                |\n`;
+  }
 
-  return [header, separator, ...rows].join("\n");
+  // 将表格内容写入 README.md 文件
+  const readmeFilePath = "README.md";
+
+  writeFileSync(readmeFilePath, table, "utf8");
 }
 
 // 主函数
