@@ -65,7 +65,7 @@ type Data = {
 };
 
 function generateAsciiTable(data: Data) {
-  // 将数据按日期排序
+  // 将数据按日期排序并反转顺序（最新日期在前）
   const sortedDates = Object.keys(data).sort(
     (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
@@ -76,8 +76,8 @@ function generateAsciiTable(data: Data) {
   table += "|------------|-------------------|\n";
 
   for (let i = 1; i < sortedDates.length; i++) {
-    const prevDate = sortedDates[i - 1];
-    const currDate = sortedDates[i];
+    const prevDate = sortedDates[i];
+    const currDate = sortedDates[i - 1];
 
     const prevSongsLeft = data[prevDate].data.songs_left;
     const currSongsLeft = data[currDate].data.songs_left;
