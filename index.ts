@@ -67,7 +67,7 @@ type Data = {
 function generateAsciiTable(data: Data) {
   // 将数据按日期排序
   const sortedDates = Object.keys(data).sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime()
+    (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
 
   // 生成表格
