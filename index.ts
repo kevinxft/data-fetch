@@ -1,6 +1,16 @@
 import axios from "axios";
+import dotenv from "dotenv";
 import { readFileSync, writeFileSync, existsSync } from "fs";
+import { generateSVG } from "./generateSVG";
 
+type ChartPoint = {
+  date: Date;
+  value: number;
+};
+
+if (!process.env.GITHUB_ACTIONS) {
+  await dotenv.config();
+}
 // 从环境变量获取 API_KEY 和 MAX_DAYS
 const API_KEY = process.env.API_KEY as string;
 const MAX_DAYS = parseInt(process.env.MAX_DAYS || "30", 10); // 默认值为 30 天
@@ -19,6 +29,9 @@ async function fetchData() {
   try {
     const response = await axios(config);
     const newData = response.data;
+    if (!process.env.GITHUB_ACTIONS) {
+      console.log(newData);
+    }
     const date = new Date().toISOString().split("T")[0];
 
     // 如果文件存在，读取已有数据
@@ -69,8 +82,9 @@ function generateAsciiTable(data: Data) {
     (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
 
+  const chartPoint: ChartPoint[] = [];
   // 生成表格
-  let table = "# API 每日使用量\n\n";
+  let table = "# API 每日使用量(每天23:30更新)\n\n";
   table += "| 日期       | 还剩的总次数 | 当天用的次数 |\n";
   table += "|------------|------------|-------------------|\n";
 
@@ -82,7 +96,7 @@ function generateAsciiTable(data: Data) {
       const prevDate = sortedDates[i + 1];
       const prevSongsLeft = data[prevDate].data.songs_left;
       const change = prevSongsLeft - currSongsLeft; // 计算当前歌曲剩余数与前一个日期的差值
-
+      chartPoint.push({ date: new Date(currDate), value: change });
       table += `| ${currDate} | ${currSongsLeft} | ${change}                |\n`;
     } else {
       // For the first date, there is no previous date to compare
@@ -90,10 +104,13 @@ function generateAsciiTable(data: Data) {
     }
   }
 
+  table += "\n\n ![走势图](./chart.svg)";
+
   // 将表格内容写入 README.md 文件
   const readmeFilePath = "README.md";
 
   writeFileSync(readmeFilePath, table, "utf8");
+  generateSVG(chartPoint);
 }
 
 // 主函数
