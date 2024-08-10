@@ -11,14 +11,6 @@
     "code": 0,
     "msg": "success",
     "data": {
-      "songs_left": 2807,
-      "points": 0
-    }
-  },
-  "2024-08-10": {
-    "code": 0,
-    "msg": "success",
-    "data": {
       "songs_left": 2725,
       "points": 0
     }
