@@ -84,7 +84,7 @@ function generateAsciiTable(data: Data) {
 
   const chartPoint: ChartPoint[] = [];
   // 生成表格
-  let table = "# API 每日使用量(每天在11:30 和 23:30更新)\n\n";
+  let table = "# API 每日使用量(每天在19:30 和 23:30更新)\n\n";
   table += "| 日期       | 还剩的总次数 | 当天用的次数 |\n";
   table += "|------------|------------|-------------------|\n";
 
