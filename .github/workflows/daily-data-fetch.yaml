@@ -2,7 +2,7 @@ name: Daily Data Fetch
 
 on:
   schedule:
-    - cron: "30 3 * * *" # 每天的 11:30 AM (中国时区)
+    - cron: "30 11 * * *" # 每天的 7:30 PM (中国时区)
     - cron: "30 15 * * *" # 每天的 11:30 PM (中国时区)
 
   # allows to manually run the job at any time
