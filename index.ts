@@ -84,7 +84,9 @@ function generateAsciiTable(data: Data) {
 
   const chartPoint: ChartPoint[] = [];
   // 生成表格
-  let table = "# API 每日使用量(每天在19:30 和 23:30更新)\n\n";
+  let table = "# API 每日使用量(每天早上8点到晚上11点，三小时更新一次)\n\n";
+  table += "\n\n ![走势图](./chart.svg)\n\n";
+
   table += "| 日期       | 还剩的总次数 | 当天用的次数 |\n";
   table += "|------------|------------|-------------------|\n";
 
@@ -103,8 +105,6 @@ function generateAsciiTable(data: Data) {
       table += `| ${currDate} | ${currSongsLeft} | N/A                |\n`;
     }
   }
-
-  table += "\n\n ![走势图](./chart.svg)";
 
   // 将表格内容写入 README.md 文件
   const readmeFilePath = "README.md";
