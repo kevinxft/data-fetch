@@ -150,5 +150,13 @@
       "songs_left": 1055,
       "points": 0
     }
+  },
+  "2024-08-28": {
+    "code": 0,
+    "msg": "success",
+    "data": {
+      "songs_left": 1047,
+      "points": 0
+    }
   }
 }
