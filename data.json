@@ -190,5 +190,13 @@
       "songs_left": 4427,
       "points": 0
     }
+  },
+  "2024-10-03": {
+    "code": 0,
+    "msg": "success",
+    "data": {
+      "songs_left": 4425,
+      "points": 0
+    }
   }
 }
