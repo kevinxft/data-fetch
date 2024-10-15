@@ -1,12 +1,4 @@
 {
-  "2024-09-14": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 5855,
-      "points": 0
-    }
-  },
   "2024-09-15": {
     "code": 0,
     "msg": "success",
@@ -244,6 +236,14 @@
     "msg": "success",
     "data": {
       "songs_left": 3815,
+      "points": 0
+    }
+  },
+  "2024-10-15": {
+    "code": 0,
+    "msg": "success",
+    "data": {
+      "songs_left": 3813,
       "points": 0
     }
   }
