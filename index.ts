@@ -83,27 +83,52 @@ function generateAsciiTable(data: Data) {
   );
 
   const chartPoint: ChartPoint[] = [];
-  // 生成表格
   let table = "# API使用量(2小时更新一次)\n\n";
   table += "\n\n ![走势图](./chart.svg)\n\n";
 
-  table += "| 日期       | 还剩的总次数 | 当天用的次数 |\n";
-  table += "|------------|------------|-------------------|\n";
+  // 添加周平均使用量的计算
+  let weeklyTotal = 0;
+  let weeklyCount = 0;
+
+  table += "| 日期       | 还剩的总次数 | 当天用的次数 | 周平均使用量 | 预计剩余天数 |\n";
+  table += "|------------|------------|-------------------|-------------|-------------|\n";
 
   for (let i = 0; i < sortedDates.length; i++) {
     const currDate = sortedDates[i];
     const currSongsLeft = data[currDate].data.songs_left;
+    let weeklyAvg = 'N/A';
+    let daysRemaining = 'N/A';
 
     if (i < sortedDates.length - 1) {
       const prevDate = sortedDates[i + 1];
       const prevSongsLeft = data[prevDate].data.songs_left;
-      const change = prevSongsLeft - currSongsLeft; // 计算当前歌曲剩余数与前一个日期的差值
-      chartPoint.push({ date: new Date(currDate), value: change });
-      table += `| ${currDate} | ${currSongsLeft} | ${change}                |\n`;
-    } else {
-      // For the first date, there is no previous date to compare
-      table += `| ${currDate} | ${currSongsLeft} | N/A                |\n`;
+      const dailyUsage = prevSongsLeft - currSongsLeft;
+
+      // 计算周平均使用量
+      weeklyTotal += dailyUsage;
+      weeklyCount++;
+      
+      if (weeklyCount >= 7) {
+        weeklyAvg = Math.round(weeklyTotal / weeklyCount).toString();
+        // 计算预计剩余天数
+        const avgDailyUsage = weeklyTotal / weeklyCount;
+        if (avgDailyUsage > 0) {
+          daysRemaining = Math.round(currSongsLeft / avgDailyUsage).toString();
+        }
+      }
     }
+
+    chartPoint.push({
+      date: new Date(currDate),
+      value: currSongsLeft,
+    });
+
+    const prevDate = i < sortedDates.length - 1 ? sortedDates[i + 1] : null;
+    const dailyUsage = prevDate
+      ? data[prevDate].data.songs_left - currSongsLeft
+      : "N/A";
+
+    table += `| ${currDate} | ${currSongsLeft} | ${dailyUsage} | ${weeklyAvg} | ${daysRemaining} |\n`;
   }
 
   // 将表格内容写入 README.md 文件
