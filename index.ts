@@ -84,51 +84,57 @@ function generateAsciiTable(data: Data) {
 
   const chartPoint: ChartPoint[] = [];
   let table = "# API使用量(2小时更新一次)\n\n";
+
+  // 只取最近7天的数据用于走势图
+  const last7Days = sortedDates.slice(0, 7);
+  for (const date of last7Days) {
+    chartPoint.push({
+      date: new Date(date),
+      value: data[date].data.songs_left,
+    });
+  }
+
   table += "\n\n ![走势图](./chart.svg)\n\n";
 
-  // 添加周平均使用量的计算
+  // 计算并显示周平均使用量和预计剩余天数
   let weeklyTotal = 0;
   let weeklyCount = 0;
+  let currentSongsLeft = data[sortedDates[0]]?.data.songs_left || 0;
 
-  table += "| 日期       | 还剩的总次数 | 当天用的次数 | 周平均使用量 | 预计剩余天数 |\n";
-  table += "|------------|------------|-------------------|-------------|-------------|\n";
+  for (let i = 0; i < sortedDates.length - 1 && i < 7; i++) {
+    const currDate = sortedDates[i];
+    const nextDate = sortedDates[i + 1];
+    const dailyUsage = data[nextDate].data.songs_left - data[currDate].data.songs_left;
+    weeklyTotal += dailyUsage;
+    weeklyCount++;
+  }
+
+  const weeklyAvg = weeklyCount > 0 ? Math.round(weeklyTotal / weeklyCount) : 'N/A';
+  const daysRemaining = weeklyCount > 0 ? 
+    Math.round(currentSongsLeft / (weeklyTotal / weeklyCount)) : 
+    'N/A';
+
+  // 添加统计信息表格
+  table += "## 使用统计\n\n";
+  table += "| 指标 | 数值 |\n";
+  table += "|------|------|\n";
+  table += `| 周平均使用量 | ${weeklyAvg} |\n`;
+  table += `| 预计剩余天数 | ${daysRemaining} |\n\n`;
+
+  // 添加详细数据表格
+  table += "## 详细数据\n\n";
+  table += "| 日期 | 还剩的总次数 | 当天用的次数 |\n";
+  table += "|------|------------|-------------|\n";
 
   for (let i = 0; i < sortedDates.length; i++) {
     const currDate = sortedDates[i];
     const currSongsLeft = data[currDate].data.songs_left;
-    let weeklyAvg = 'N/A';
-    let daysRemaining = 'N/A';
-
-    if (i < sortedDates.length - 1) {
-      const prevDate = sortedDates[i + 1];
-      const prevSongsLeft = data[prevDate].data.songs_left;
-      const dailyUsage = prevSongsLeft - currSongsLeft;
-
-      // 计算周平均使用量
-      weeklyTotal += dailyUsage;
-      weeklyCount++;
-      
-      if (weeklyCount >= 7) {
-        weeklyAvg = Math.round(weeklyTotal / weeklyCount).toString();
-        // 计算预计剩余天数
-        const avgDailyUsage = weeklyTotal / weeklyCount;
-        if (avgDailyUsage > 0) {
-          daysRemaining = Math.round(currSongsLeft / avgDailyUsage).toString();
-        }
-      }
-    }
-
-    chartPoint.push({
-      date: new Date(currDate),
-      value: currSongsLeft,
-    });
-
     const prevDate = i < sortedDates.length - 1 ? sortedDates[i + 1] : null;
     const dailyUsage = prevDate
       ? data[prevDate].data.songs_left - currSongsLeft
       : "N/A";
 
-    table += `| ${currDate} | ${currSongsLeft} | ${dailyUsage} | ${weeklyAvg} | ${daysRemaining} |\n`;
+    table += `| ${currDate} | ${currSongsLeft} | ${dailyUsage} |\n`;
   }
 
   // 将表格内容写入 README.md 文件
