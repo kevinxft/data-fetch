@@ -89,15 +89,29 @@ function generateAsciiTable(data: Data) {
   const last14Days = sortedDates.slice(0, 14).reverse(); // 反转顺序，使日期按时间顺序排列
   
   // 计算每天的使用次数
-  for (let i = 0; i < last14Days.length - 1; i++) {
+  for (let i = 0; i < last14Days.length; i++) {
     const currentDate = last14Days[i];
-    const nextDate = last14Days[i + 1];
-    const dailyUsage = Math.abs(data[nextDate].data.songs_left - data[currentDate].data.songs_left);
+    const currentData = data[currentDate];
     
-    chartPoint.push({
-      date: new Date(nextDate),
-      value: dailyUsage
-    });
+    // 如果不是第一天，计算与前一天的差值
+    if (i > 0) {
+      const prevDate = last14Days[i - 1];
+      const prevData = data[prevDate];
+      
+      // 如果当前剩余次数比前一天少，说明使用了一些次数
+      const dailyUsage = Math.max(0, prevData.data.songs_left - currentData.data.songs_left);
+      
+      chartPoint.push({
+        date: new Date(currentDate),
+        value: dailyUsage
+      });
+    } else {
+      // 对于第一天，我们假设使用量为0
+      chartPoint.push({
+        date: new Date(currentDate),
+        value: 0
+      });
+    }
   }
 
   // 生成走势图
