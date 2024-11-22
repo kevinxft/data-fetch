@@ -85,40 +85,36 @@ function generateAsciiTable(data: Data) {
   const chartPoint: ChartPoint[] = [];
   let table = "# API使用量(2小时更新一次)\n\n";
 
-  // 只取最近7天的数据用于走势图
-  const last7Days = sortedDates.slice(0, 7);
-  for (const date of last7Days) {
+  // 只取最近14天的数据用于走势图
+  const last14Days = sortedDates.slice(0, 14).reverse(); // 反转顺序，使日期按时间顺序排列
+  
+  // 计算每天的使用次数
+  for (let i = 0; i < last14Days.length - 1; i++) {
+    const currentDate = last14Days[i];
+    const nextDate = last14Days[i + 1];
+    const dailyUsage = Math.abs(data[nextDate].data.songs_left - data[currentDate].data.songs_left);
+    
     chartPoint.push({
-      date: new Date(date),
-      value: data[date].data.songs_left,
+      date: new Date(nextDate),
+      value: dailyUsage
     });
   }
 
+  // 生成走势图
+  generateSVG(chartPoint);
   table += "\n\n ![走势图](./chart.svg)\n\n";
 
-  // 计算并显示周平均使用量和预计剩余天数
-  let weeklyTotal = 0;
-  let weeklyCount = 0;
-  let currentSongsLeft = data[sortedDates[0]]?.data.songs_left || 0;
-
-  for (let i = 0; i < sortedDates.length - 1 && i < 7; i++) {
-    const currDate = sortedDates[i];
-    const nextDate = sortedDates[i + 1];
-    const dailyUsage = data[nextDate].data.songs_left - data[currDate].data.songs_left;
-    weeklyTotal += dailyUsage;
-    weeklyCount++;
-  }
-
-  const weeklyAvg = weeklyCount > 0 ? Math.round(weeklyTotal / weeklyCount) : 'N/A';
-  const daysRemaining = weeklyCount > 0 ? 
-    Math.round(currentSongsLeft / (weeklyTotal / weeklyCount)) : 
-    'N/A';
+  // 计算并显示周平均使用量
+  const weeklyUsage = chartPoint.reduce((sum, point) => sum + point.value, 0);
+  const weeklyAvg = chartPoint.length > 0 ? Math.round(weeklyUsage / chartPoint.length) : 'N/A';
+  const currentSongsLeft = data[sortedDates[0]]?.data.songs_left || 0;
+  const daysRemaining = weeklyAvg !== 'N/A' ? Math.round(currentSongsLeft / weeklyAvg) : 'N/A';
 
   // 添加统计信息表格
   table += "## 使用统计\n\n";
   table += "| 指标 | 数值 |\n";
   table += "|------|------|\n";
-  table += `| 周平均使用量 | ${weeklyAvg} |\n`;
+  table += `| 日平均使用量 | ${weeklyAvg} |\n`;
   table += `| 预计剩余天数 | ${daysRemaining} |\n\n`;
 
   // 添加详细数据表格
@@ -131,7 +127,7 @@ function generateAsciiTable(data: Data) {
     const currSongsLeft = data[currDate].data.songs_left;
     const prevDate = i < sortedDates.length - 1 ? sortedDates[i + 1] : null;
     const dailyUsage = prevDate
-      ? data[prevDate].data.songs_left - currSongsLeft
+      ? Math.abs(data[prevDate].data.songs_left - currSongsLeft)
       : "N/A";
 
     table += `| ${currDate} | ${currSongsLeft} | ${dailyUsage} |\n`;
@@ -141,7 +137,6 @@ function generateAsciiTable(data: Data) {
   const readmeFilePath = "README.md";
 
   writeFileSync(readmeFilePath, table, "utf8");
-  generateSVG(chartPoint);
 }
 
 // 主函数

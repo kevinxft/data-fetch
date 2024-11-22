@@ -4,8 +4,8 @@ import * as d3 from "d3";
 
 export function generateSVG(data: any[]) {
   const d3n = new D3Node();
-  const margin = { top: 40, right: 60, bottom: 50, left: 60 };
-  const width = 800 - margin.left - margin.right;
+  const margin = { top: 40, right: 60, bottom: 60, left: 60 }; 
+  const width = 1000 - margin.left - margin.right; 
   const height = 400 - margin.top - margin.bottom;
 
   // 创建SVG容器
@@ -22,7 +22,7 @@ export function generateSVG(data: any[]) {
     .attr("text-anchor", "middle")
     .style("font-size", "16px")
     .style("font-weight", "bold")
-    .text("使用量趋势图");
+    .text("最近14天使用次数趋势");
 
   // 创建比例尺
   const xScale = d3.scaleTime()
@@ -30,20 +30,20 @@ export function generateSVG(data: any[]) {
     .range([0, width]);
 
   const yScale = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.value) as number])
+    .domain([0, d3.max(data, d => d.value) as number * 1.2]) 
     .nice()
     .range([height, 0]);
 
   // 创建坐标轴
   const xAxis = d3.axisBottom(xScale)
-    .ticks(7)
+    .ticks(data.length)
     .tickFormat(d => d3.timeFormat("%m-%d")(d as Date));
 
   const yAxis = d3.axisLeft(yScale)
     .ticks(5)
-    .tickFormat(d => d.toString());
+    .tickFormat(d => d.toString() + "次");
 
-  // 添加网格线
+  // 创建坐标轴网格线
   svg.append("g")
     .attr("class", "grid")
     .attr("transform", `translate(0,${height})`)
@@ -114,7 +114,10 @@ export function generateSVG(data: any[]) {
     .attr("transform", `translate(0,${height})`)
     .call(xAxis)
     .selectAll("text")
-    .style("text-anchor", "middle");
+    .style("text-anchor", "end")
+    .attr("dx", "-.8em")
+    .attr("dy", ".15em")
+    .attr("transform", "rotate(-45)");
 
   // 添加Y轴
   svg.append("g")
