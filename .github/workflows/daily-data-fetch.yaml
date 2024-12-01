@@ -1,15 +1,8 @@
 name: Daily Data Fetch
 
 on:
-  schedule:
-    - cron: "0 */2 * * *"
-
-  # allows to manually run the job at any time
+  # 只保留手动触发选项
   workflow_dispatch:
-
-  push:
-    branches:
-      - main # 当推送到 main 分支时触发工作流
 
 jobs:
   fetch-data:

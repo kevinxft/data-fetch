@@ -18,7 +18,7 @@ const DATA_FILE = "data.json"; // 数据存储文件
 // 获取数据并存储
 async function fetchData() {
   const config = {
-    url: "https://api.sunoaiapi.com/api/v1/gateway/limit",
+    url: "https://api.sunoaiapi.com/v1/user/balance",
     method: "get",
     headers: {
       "Content-Type": "application/json",
@@ -28,100 +28,65 @@ async function fetchData() {
 
   try {
     const response = await axios(config);
-    const newData = response.data;
-    if (!process.env.GITHUB_ACTIONS) {
-      console.log(newData);
-    }
-    const date = new Date().toISOString().split("T")[0];
-
-    // 如果文件存在，读取已有数据
-    let data: Record<string, any> = {};
+    const points = response.data.points;
+    
+    // 读取现有数据或创建新的数据数组
+    let historicalData: ChartPoint[] = [];
     if (existsSync(DATA_FILE)) {
-      const fileContent = readFileSync(DATA_FILE, "utf-8");
-      data = JSON.parse(fileContent);
+      historicalData = JSON.parse(readFileSync(DATA_FILE, "utf-8"));
     }
 
-    // 更新数据
-    data[date] = newData;
+    // 添加新数据点
+    const newDataPoint: ChartPoint = {
+      date: new Date(),
+      value: points
+    };
 
     // 保持数据不超过 MAX_DAYS 天
-    const sortedDates = Object.keys(data).sort();
-    if (sortedDates.length > MAX_DAYS) {
-      const cutoffDate = sortedDates[sortedDates.length - MAX_DAYS - 1];
-      for (const dateKey of sortedDates) {
-        if (new Date(dateKey) < new Date(cutoffDate)) {
-          delete data[dateKey];
-        }
-      }
+    historicalData.push(newDataPoint);
+    if (historicalData.length > MAX_DAYS) {
+      historicalData.shift();
     }
 
     // 将更新后的数据写回文件
-    writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    writeFileSync(DATA_FILE, JSON.stringify(historicalData, null, 2));
 
-    generateAsciiTable(data);
+    generateAsciiTable(historicalData);
   } catch (error) {
     console.error("Error fetching data:", error);
   }
 }
 
-type DataEntry = {
-  code: number;
-  msg: string;
-  data: {
-    songs_left: number;
-    points: number;
-  };
-};
-
-type Data = {
-  [date: string]: DataEntry;
-};
-function generateAsciiTable(data: Data) {
+function generateAsciiTable(data: ChartPoint[]) {
   // 将数据按日期排序并反转顺序（最新日期在前）
-  const sortedDates = Object.keys(data).sort(
-    (a, b) => new Date(b).getTime() - new Date(a).getTime()
+  const sortedData = data.sort(
+    (a, b) => b.date.getTime() - a.date.getTime()
   );
 
-  const chartPoint: ChartPoint[] = [];
   let table = "# API使用量(2小时更新一次)\n\n";
 
-  // 只取最近14天的数据用于走势图
-  const last14Days = sortedDates.slice(0, 14).reverse(); // 反转顺序，使日期按时间顺序排列
-  
   // 计算每天的使用次数
-  for (let i = 0; i < last14Days.length; i++) {
-    const currentDate = last14Days[i];
-    const currentData = data[currentDate];
+  for (let i = 0; i < sortedData.length; i++) {
+    const currentDate = sortedData[i];
     
     // 如果不是第一天，计算与前一天的差值
     if (i > 0) {
-      const prevDate = last14Days[i - 1];
-      const prevData = data[prevDate];
+      const prevDate = sortedData[i - 1];
       
       // 如果当前剩余次数比前一天少，说明使用了一些次数
-      const dailyUsage = Math.max(0, prevData.data.songs_left - currentData.data.songs_left);
+      const dailyUsage = Math.max(0, prevDate.value - currentDate.value);
       
-      chartPoint.push({
-        date: new Date(currentDate),
-        value: dailyUsage
-      });
+      table += `| ${currentDate.date.toISOString().split("T")[0]} | ${currentDate.value} | ${dailyUsage} |\n`;
     } else {
       // 对于第一天，我们假设使用量为0
-      chartPoint.push({
-        date: new Date(currentDate),
-        value: 0
-      });
+      table += `| ${currentDate.date.toISOString().split("T")[0]} | ${currentDate.value} | 0 |\n`;
     }
   }
 
-  // 生成走势图
-  generateSVG(chartPoint);
-  table += "\n\n ![走势图](./chart.svg)\n\n";
-
   // 计算并显示周平均使用量
-  const weeklyUsage = chartPoint.reduce((sum, point) => sum + point.value, 0);
-  const weeklyAvg = chartPoint.length > 0 ? Math.round(weeklyUsage / chartPoint.length) : 'N/A';
-  const currentSongsLeft = data[sortedDates[0]]?.data.songs_left || 0;
+  const weeklyUsage = sortedData.reduce((sum, point) => sum + point.value, 0);
+  const weeklyAvg = sortedData.length > 0 ? Math.round(weeklyUsage / sortedData.length) : 'N/A';
+  const currentSongsLeft = sortedData[0].value || 0;
   const daysRemaining = weeklyAvg !== 'N/A' ? Math.round(currentSongsLeft / weeklyAvg) : 'N/A';
 
   // 添加统计信息表格
@@ -136,15 +101,15 @@ function generateAsciiTable(data: Data) {
   table += "| 日期 | 还剩的总次数 | 当天用的次数 |\n";
   table += "|------|------------|-------------|\n";
 
-  for (let i = 0; i < sortedDates.length; i++) {
-    const currDate = sortedDates[i];
-    const currSongsLeft = data[currDate].data.songs_left;
-    const prevDate = i < sortedDates.length - 1 ? sortedDates[i + 1] : null;
+  for (let i = 0; i < sortedData.length; i++) {
+    const currDate = sortedData[i];
+    const currSongsLeft = currDate.value;
+    const prevDate = i < sortedData.length - 1 ? sortedData[i + 1] : null;
     const dailyUsage = prevDate
-      ? Math.abs(data[prevDate].data.songs_left - currSongsLeft)
+      ? Math.abs(prevDate.value - currSongsLeft)
       : "N/A";
 
-    table += `| ${currDate} | ${currSongsLeft} | ${dailyUsage} |\n`;
+    table += `| ${currDate.date.toISOString().split("T")[0]} | ${currSongsLeft} | ${dailyUsage} |\n`;
   }
 
   // 将表格内容写入 README.md 文件
