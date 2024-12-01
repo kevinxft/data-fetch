@@ -18,7 +18,7 @@ const DATA_FILE = "data.json"; // 数据存储文件
 // 获取数据并存储
 async function fetchData() {
   const config = {
-    url: "https://api.sunoaiapi.com/user/balance",
+    url: "https://api.sunoaiapi.com/v1/user/balance",
     method: "get",
     headers: {
       "Content-Type": "application/json",
