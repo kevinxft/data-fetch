@@ -68,7 +68,6 @@ type DataEntry = {
   code: number;
   msg: string;
   data: {
-    songs_left: number;
     points: number;
   };
 };
@@ -99,7 +98,7 @@ function generateAsciiTable(data: Data) {
       const prevData = data[prevDate];
       
       // 如果当前剩余次数比前一天少，说明使用了一些次数
-      const dailyUsage = Math.max(0, prevData.data.songs_left - currentData.data.songs_left);
+      const dailyUsage = Math.max(0, prevData.data.points - currentData.data.points);
       
       chartPoint.push({
         date: new Date(currentDate),
@@ -121,8 +120,8 @@ function generateAsciiTable(data: Data) {
   // 计算并显示周平均使用量
   const weeklyUsage = chartPoint.reduce((sum, point) => sum + point.value, 0);
   const weeklyAvg = chartPoint.length > 0 ? Math.round(weeklyUsage / chartPoint.length) : 'N/A';
-  const currentSongsLeft = data[sortedDates[0]]?.data.songs_left || 0;
-  const daysRemaining = weeklyAvg !== 'N/A' ? Math.round(currentSongsLeft / weeklyAvg) : 'N/A';
+  const currentPoints = data[sortedDates[0]]?.data.points || 0;
+  const daysRemaining = weeklyAvg !== 'N/A' ? Math.round(currentPoints / weeklyAvg) : 'N/A';
 
   // 添加统计信息表格
   table += "## 使用统计\n\n";
@@ -133,18 +132,18 @@ function generateAsciiTable(data: Data) {
 
   // 添加详细数据表格
   table += "## 详细数据\n\n";
-  table += "| 日期 | 还剩的总次数 | 当天用的次数 |\n";
+  table += "| 日期 | 还剩的点数 | 当天用的点数 |\n";
   table += "|------|------------|-------------|\n";
 
   for (let i = 0; i < sortedDates.length; i++) {
     const currDate = sortedDates[i];
-    const currSongsLeft = data[currDate].data.songs_left;
+    const currPoints = data[currDate].data.points;
     const prevDate = i < sortedDates.length - 1 ? sortedDates[i + 1] : null;
     const dailyUsage = prevDate
-      ? Math.abs(data[prevDate].data.songs_left - currSongsLeft)
+      ? Math.abs(data[prevDate].data.points - currPoints)
       : "N/A";
 
-    table += `| ${currDate} | ${currSongsLeft} | ${dailyUsage} |\n`;
+    table += `| ${currDate} | ${currPoints} | ${dailyUsage} |\n`;
   }
 
   // 将表格内容写入 README.md 文件
