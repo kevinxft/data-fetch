@@ -11,9 +11,8 @@ type ChartPoint = {
 if (!process.env.GITHUB_ACTIONS) {
   await dotenv.config();
 }
-// 从环境变量获取 API_KEY 和 MAX_DAYS
+// 从环境变量获取 API_KEY
 const API_KEY = process.env.API_KEY as string;
-const MAX_DAYS = parseInt(process.env.MAX_DAYS || "30", 10); // 默认值为 30 天
 const DATA_FILE = "data.json"; // 数据存储文件
 // 获取数据并存储
 async function fetchData() {
@@ -22,7 +21,7 @@ async function fetchData() {
     method: "get",
     headers: {
       "Content-Type": "application/json",
-      "api-key": API_KEY, // 使用从环境变量中读取的 API_KEY
+      "api-key": API_KEY,
     },
   };
 
@@ -39,21 +38,25 @@ async function fetchData() {
     if (existsSync(DATA_FILE)) {
       const fileContent = readFileSync(DATA_FILE, "utf-8");
       data = JSON.parse(fileContent);
+      
+      // 检查是否需要清空历史数据
+      const sortedDates = Object.keys(data).sort();
+      if (sortedDates.length > 0) {
+        const lastDate = sortedDates[sortedDates.length - 1];
+        const lastPoints = data[lastDate].data.points;
+        
+        // 如果新的点数比上次记录的要大，说明可能是充值了，清空历史数据
+        if (newData.data.points > lastPoints) {
+          if (!process.env.GITHUB_ACTIONS) {
+            console.log("检测到点数增加，清空历史数据");
+          }
+          data = {};
+        }
+      }
     }
 
     // 更新数据
     data[date] = newData;
-
-    // 保持数据不超过 MAX_DAYS 天
-    const sortedDates = Object.keys(data).sort();
-    if (sortedDates.length > MAX_DAYS) {
-      const cutoffDate = sortedDates[sortedDates.length - MAX_DAYS - 1];
-      for (const dateKey of sortedDates) {
-        if (new Date(dateKey) < new Date(cutoffDate)) {
-          delete data[dateKey];
-        }
-      }
-    }
 
     // 将更新后的数据写回文件
     writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
@@ -84,10 +87,10 @@ function generateAsciiTable(data: Data) {
   const chartPoint: ChartPoint[] = [];
   let table = "# API使用量(2小时更新一次)\n\n";
 
-  // 只取最近14天的数据用于走势图
+  // 只取最近14天的数据用���走势图
   const last14Days = sortedDates.slice(0, 14).reverse(); // 反转顺序，使日期按时间顺序排列
   
-  // 计算每天的使用次数
+  // 计算每天使用次数
   for (let i = 0; i < last14Days.length; i++) {
     const currentDate = last14Days[i];
     const currentData = data[currentDate];
