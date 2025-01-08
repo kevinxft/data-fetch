@@ -222,5 +222,13 @@
       "songs_left": 0,
       "points": 3
     }
+  },
+  "2025-01-08": {
+    "code": 0,
+    "msg": "success",
+    "data": {
+      "songs_left": 0,
+      "points": 3
+    }
   }
 }
