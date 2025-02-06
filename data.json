@@ -30,5 +30,13 @@
       "songs_left": 0,
       "points": 1
     }
+  },
+  "2025-02-06": {
+    "code": 0,
+    "msg": "success",
+    "data": {
+      "songs_left": 0,
+      "points": 1
+    }
   }
 }
