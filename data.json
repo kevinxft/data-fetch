@@ -1,42 +1,10 @@
 {
-  "2025-02-02": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 0,
-      "points": 757
-    }
-  },
-  "2025-02-03": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 0,
-      "points": 393
-    }
-  },
-  "2025-02-04": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 0,
-      "points": 183
-    }
-  },
-  "2025-02-05": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 0,
-      "points": 1
-    }
-  },
   "2025-02-06": {
     "code": 0,
     "msg": "success",
     "data": {
       "songs_left": 0,
-      "points": 1
+      "points": 1065
     }
   }
 }
