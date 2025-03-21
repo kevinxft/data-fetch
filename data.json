@@ -342,5 +342,13 @@
       "songs_left": 0,
       "points": 89
     }
+  },
+  "2025-03-21": {
+    "code": 0,
+    "msg": "success",
+    "data": {
+      "songs_left": 0,
+      "points": -1
+    }
   }
 }
