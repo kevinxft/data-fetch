@@ -1,82 +1,10 @@
 {
-  "2025-03-21": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 0,
-      "points": 1053
-    }
-  },
-  "2025-03-22": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 0,
-      "points": 993
-    }
-  },
-  "2025-03-23": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 0,
-      "points": 993
-    }
-  },
-  "2025-03-24": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 0,
-      "points": 563
-    }
-  },
-  "2025-03-25": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 0,
-      "points": 283
-    }
-  },
-  "2025-03-26": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 0,
-      "points": 283
-    }
-  },
-  "2025-03-27": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 0,
-      "points": 263
-    }
-  },
-  "2025-03-28": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 0,
-      "points": 243
-    }
-  },
-  "2025-03-29": {
-    "code": 0,
-    "msg": "success",
-    "data": {
-      "songs_left": 0,
-      "points": 233
-    }
-  },
   "2025-03-30": {
     "code": 0,
     "msg": "success",
     "data": {
       "songs_left": 0,
-      "points": 233
+      "points": 1297
     }
   }
 }
