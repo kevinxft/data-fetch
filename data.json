@@ -2278,5 +2278,13 @@
       "songs_left": 0,
       "points": 1247
     }
+  },
+  "2026-01-09": {
+    "code": 0,
+    "msg": "success",
+    "data": {
+      "songs_left": 0,
+      "points": 1247
+    }
   }
 }
