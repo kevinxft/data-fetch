@@ -2414,5 +2414,13 @@
       "songs_left": 0,
       "points": 1247
     }
+  },
+  "2026-01-26": {
+    "code": 0,
+    "msg": "success",
+    "data": {
+      "songs_left": 0,
+      "points": 1247
+    }
   }
 }
